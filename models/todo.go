@@ -31,6 +31,7 @@ func GetAllTodo() (todos []*Todo, err error) {
 
 // GetATodo 查询一个数据
 func GetATodo(id string) (t1 *Todo, err error) {
+	// 返回值定义的变量不会设置默认值，会出现野指针情况，需要先初始化
 	t1 = new(Todo)
 	if err := dao.DB.Where("id=?", id).First(&t1).Error; err != nil {
 		return nil, err
