@@ -1,47 +1,27 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"Todo/dao"
+	"Todo/models"
+	"Todo/router"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-func sayHello(c *gin.Context) {
-	c.JSON(200, gin.H{ // 返回一个Json的数据，状态码为200
-		"message": "hello golang",
-	})
-}
-
 func main() {
-	r := gin.Default() // 返回默认的路由引擎
+	// 创建数据库 sql : CREATE DATABASE TodoList;
+	// 连接数据库
+	err := dao.InitMysql()
+	if err != nil {
+		panic(err)
+	}
+	defer dao.CloseMysql()
 
-	// 指定用户使用get请求访问hello，执行sayHello函数
-	r.GET("hello", sayHello)
+	// 绑定模型
+	dao.DB.AutoMigrate(&models.Todo{})
 
-	// rest风格请求
-	r.GET("book", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"method": "Get",
-		})
-	})
+	// 路由
+	r := router.SetupRouter()
 
-	r.POST("book", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"method": "Post",
-		})
-	})
-
-	r.DELETE("book", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"method": "Delete",
-		})
-	})
-
-	r.PUT("book", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"method": "Put",
-		})
-	})
-
-	// 启动服务,括号中可以指定端口
+	// 启动服务(括号中可以指定端口，默认8080)
 	r.Run()
 }
